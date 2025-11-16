@@ -1,23 +1,17 @@
-from vkbottle.bot import Bot, Message
 import os
+from vkbottle import API, Bot
 
-bot = Bot(token=os.getenv("TOKEN"))
+token = os.getenv("TOKEN")
+api = API(token)
+bot = Bot(api=api)
 
-# Самый надёжный способ ловить ВСЕ сообщения из чатов сообществ
-@bot.on.raw_event(2, lambda x: True)  # 2 = новое сообщение в беседе
-async def handle_message(event):
-    try:
-        msg = Message.from_dict(event["object"]["message"], bot)
-        text = msg.text.strip().lower() if msg.text else ""
+@bot.on.chat_message(text=["!пинг", "!Пинг", "!ПИНГ", ".пинг", "пинг", "!ping"])
+async def ping(message):
+    await message.answer("⚫ Onyx наконец-то живой!\n2025 год, полная победа!")
 
-        if text in ["!пинг", ".пинг", "пинг", "!ping"]:
-            await msg.answer("Onyx онлайн | 2025 | 100 % живой в чатах сообществ!")
+@bot.on.chat_message(text=["!помощь", "!help"])
+async def help_cmd(message):
+    await message.answer("⚫ Onyx работает на 100%!\nГотов к бою!")
 
-        if text in ["!помощь", "!help", "помощь"]:
-            await msg.answer("Onyx полностью работает!\nСкоро добавим все команды")
-
-    except Exception as e:
-        print("Ошибка:", e)
-
-print("Onyx запущен и ловит сообщения из чатов сообществ ⚫")
-bot.run_polling()
+print("Onyx запущен — финальная версия ⚫")
+bot.run_forever()
