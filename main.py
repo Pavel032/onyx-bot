@@ -1,7 +1,11 @@
-from vkbottle.bot import Bot, Message
+from vkbottle.bot import Bot, Message, BotLabeler
 import os
 
-bot = Bot(token=os.getenv("TOKEN"))
+labeler = BotLabeler()
+labeler.vbml_ignore_case = True  # игнорируем регистр
+labeler.auto_rules = [lambda m: m.from_id > 0]  # разрешаем сообщения из чатов сообществ
+
+bot = Bot(token=os.getenv("TOKEN"), labeler=labeler)
 
 @bot.on.message()
 async def handler(message: Message):
@@ -11,16 +15,10 @@ async def handler(message: Message):
     text = message.text.strip().lower()
 
     if text in ["!пинг", ".пинг", "пинг", "!ping"]:
-        await message.answer("⚫ Onyx онлайн | 2025 | Полностью живой!")
+        await message.answer("⚫ Onyx онлайн | 2025 | Работает в чатах сообществ!")
 
-    if text in ["!помощь", "!help", "помощь", "help"]:
-        await message.answer("""⚫ Onyx • Чат-менеджер 2025
+    if text in ["!помощь", "!help", "помощь"]:
+        await message.answer("⚫ Onyx живой!\nСкоро добавим все команды")
 
-!пинг — проверка бота
-!помощь — это меню
-
-Скоро добавим всё остальное:
-• !бан • !кик • !варн • антимат • статистика • топ • мини-приложение""")
-
-print("Onyx полностью запущен ⚫")
-bot.run_polling()   # ← без await !!!
+print("Onyx полностью запущен в чатах сообществ ⚫")
+bot.run_polling()
