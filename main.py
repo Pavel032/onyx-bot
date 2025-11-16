@@ -3,24 +3,23 @@ import os
 
 bot = Bot(token=os.getenv("TOKEN"))
 
-@bot.on.chat_message(text_lower=["!пинг", ".пинг"])
-async def ping(message: Message):
-    await message.answer("⚫ Onyx онлайн | <10мс | Полный клон pxolly готов!")
+# Работаем со строчными буквами вручную (универсально для всех версий)
+@bot.on.chat_message()
+async def handler(message: Message):
+    if not message.text:
+        return
+    
+    text = message.text.strip().lower()
+    
+    if text in ["!пинг", ".пинг"]:
+        await message.answer("Onyx онлайн | <5мс | 100 % живой!")
+    
+    if text in ["!помощь", "!help"]:
+        await message.answer("""Onyx • Чат-менеджер 2025
 
-@bot.on.chat_message(text_lower=["!помощь", "!help"])
-async def help_cmd(message: Message):
-    await message.answer("""⚫ Onyx • Чат-менеджер v1.0
+!пинг — проверка бота
+!помощь — это меню
+Скоро: !бан, !кик, !варн, статистика, топ, антимат и мини-приложение""")
 
-!пинг — тест
-!бан @user — бан
-!кик @user — кик
-!варн @user — предупреждение
-!стата — статистика
-!топ — топ активных
-!удалить 10 — удалить 10 сообщений
-!префикс . — сменить префикс
-
-Скоро добавим антимат и мини-приложение!""")
-
-print("Onyx запущен ⚫")
+print("Onyx полностью запущен ⚫")
 bot.run_forever()
