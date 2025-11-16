@@ -1,24 +1,23 @@
-from vkbottle.bot import Bot, Message, BotLabeler
+from vkbottle.bot import Bot, Message
 import os
 
-labeler = BotLabeler()
-labeler.vbml_ignore_case = True  # игнорируем регистр
-labeler.auto_rules = [lambda m: m.from_id > 0]  # разрешаем сообщения из чатов сообществ
+bot = Bot(token=os.getenv("TOKEN"))
 
-bot = Bot(token=os.getenv("TOKEN"), labeler=labeler)
+# Самый надёжный способ ловить ВСЕ сообщения из чатов сообществ
+@bot.on.raw_event(2, lambda x: True)  # 2 = новое сообщение в беседе
+async def handle_message(event):
+    try:
+        msg = Message.from_dict(event["object"]["message"], bot)
+        text = msg.text.strip().lower() if msg.text else ""
 
-@bot.on.message()
-async def handler(message: Message):
-    if not message.text:
-        return
+        if text in ["!пинг", ".пинг", "пинг", "!ping"]:
+            await msg.answer("Onyx онлайн | 2025 | 100 % живой в чатах сообществ!")
 
-    text = message.text.strip().lower()
+        if text in ["!помощь", "!help", "помощь"]:
+            await msg.answer("Onyx полностью работает!\nСкоро добавим все команды")
 
-    if text in ["!пинг", ".пинг", "пинг", "!ping"]:
-        await message.answer("⚫ Onyx онлайн | 2025 | Работает в чатах сообществ!")
+    except Exception as e:
+        print("Ошибка:", e)
 
-    if text in ["!помощь", "!help", "помощь"]:
-        await message.answer("⚫ Onyx живой!\nСкоро добавим все команды")
-
-print("Onyx полностью запущен в чатах сообществ ⚫")
+print("Onyx запущен и ловит сообщения из чатов сообществ ⚫")
 bot.run_polling()
