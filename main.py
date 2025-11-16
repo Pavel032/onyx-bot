@@ -1,15 +1,21 @@
 from vkbottle.bot import Bot, Message
 import os
 
-bot = Bot(token=os.getenv("TOKEN"))   # ← только token, без group_ids!
+bot = Bot(token=os.getenv("TOKEN"))
 
-@bot.on.chat_message(text="!пинг")
-async def ping(message: Message):
-    await message.answer("⚫ Onyx живой!\n2025 — наконец-то полная победа!")
+# Ловим ВСЁ из чатов сообществ
+@bot.on.message()
+async def all_messages(message: Message):
+    if not message.text:
+        return
 
-@bot.on.chat_message(text=["!помощь", "!help"])
-async def help_cmd(message: Message):
-    await message.answer("⚫ Onyx 100 % работает в чатах сообществ!")
+    text = message.text.strip().lower()
 
-print("Onyx запущен — финальная версия 2025 ⚫")
-bot.run_polling()
+    if text in ["!пинг", ".пинг", "пинг", "!ping"]:
+        await message.answer("⚫ Onyx живой | 16.11.2025 | Работает в чатах сообществ!")
+
+    if text in ["!помощь", "!help"]:
+        await message.answer("⚫ Onyx полностью работает!")
+
+print("Onyx запущен и ловит ВСЁ из чатов сообществ ⚫")
+await bot.run_polling()
