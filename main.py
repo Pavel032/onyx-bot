@@ -146,11 +146,110 @@ async def count_stats(message: Message):
         await db.execute("INSERT OR REPLACE INTO stats VALUES (?, ?, (SELECT messages FROM stats WHERE peer_id=? AND user_id=?)+1)", (message.peer_id, message.from_id, message.peer_id, message.from_id))
         await db.commit()
 
+# ——— ДОБАВЬ ЭТО В КОНЕЦ main.py ———
+
+# Удаление последних N сообщений
+@bot.on.message(text="!удалить <amount:int>")
+async def delete_messages(message: Message, amount: int):
+    if not await is_admin(message):
+        return
+    if amount < 1 or amount > 100:
+        return await message.answer("⚫ Укажи от 1 до 100")
+    msgs = await bot.api.messages.get_history(peer_id=message.peer_id, count=amount + 1)
+    ids = [m.id for m in msgs.items if m.id != message.id][:amount]
+    if ids:
+        await bot.api.messages.delete(message_ids=ids, delete_for_all=True)
+    await message.answer(f"⚫ Удалено {len(ids)} сообщений")
+
+# Список ЧС
+@bot.on.message(text="!чс")
+async def blacklist_list(message: Message):
+    if not await is_admin(message):
+        return
+    async with aiosqlite.connect(DB) as db:
+        cur = await db.execute("SELECT user_id, reason FROM blacklist WHERE peer_id=?", (message.peer_id,))
+        rows = await cur.fetchall()
+    if not rows:
+        return await message.answer("⚫ ЧС пуст")
+    text = "⚫ Чёрный список:\n"
+    for uid, reason in rows:
+        text += f"• [id{uid}|{uid}] — {reason}\n"
+    await message.answer(text)
+
+# Разбан
+@bot.on.message(text="!разбан <user_id:int>")
+async def unban(message: Message, user_id: int):
+    if not await is_admin(message):
+        return
+    async with aiosqlite.connect(DB) as db:
+        await db.execute("DELETE FROM blacklist WHERE peer_id=? AND user_id=?", (message.peer_id, user_id))
+        await db.commit()
+    await message.answer(f"⚫ {user_id} разбанен")
+
+# Снять варн
+@bot.on.message(text="!разварн <user_id:int>")
+async def unwarn(message: Message, user_id: int):
+    if not await is_admin(message):
+        return
+    async with aiosqlite.connect(DB) as db:
+        await db.execute("DELETE FROM warns WHERE peer_id=? AND user_id=?", (message.peer_id, user_id))
+        await db.commit()
+    await message.answer(f"⚫ Снят варн у {user_id}")
+
+# Антимат вкл/выкл
+@bot.on.message(text=["!антимат вкл", "!антимат выкл"])
+async def antimat_toggle(message: Message):
+    if not await is_admin(message):
+        return
+    state = "вкл" in message.text.lower()
+    # Можно хранить в БД, но для простоты используем файл
+    with open("antimat.txt", "w") as f:
+        f.write("1" if state else "0")
+    await message.answer(f"⚫ Антимат {'включён' if state else 'выключён'}")
+
+# Проверка антимат-файла
+def antimat_enabled():
+    try:
+        return open("antimat.txt").read().strip() == "1"
+    except:
+        return False
+
+# Расширенный антимат
+@bot.on.message()
+async def antimat(message: Message):
+    if antimat_enabled() and any(word in message.text.lower() for word in ["хуй", "пизд", "ебан", "бля", "пидор", "сука", "шлюха", "гнида"]):
+        await message.delete()
+        await message.answer(f"⚫ @id{message.from_id}(Мат запрещён!)")
+
+# Префикс (простая смена)
+@bot.on.message(text="!префикс <prefix>")
+async def change_prefix(message: Message, prefix: str):
+    if not await is_admin(message):
+        return
+    with open("prefix.txt", "w", encoding="utf-8") as f:
+        f.write(prefix)
+    await message.answer(f"⚫ Префикс изменён на {prefix}")
+
+# Чтение префикса
+def get_prefix():
+    try:
+        return open("prefix.txt", encoding="utf-8").read().strip() or "!"
+    except:
+        return "!"
+
+# Пример использования префикса (можно расширить все команды)
+@bot.on.message(text=f"{get_prefix()}пинг")
+async def ping_with_prefix(message: Message):
+    await message.answer("⚫ Onyx живой с новым префиксом!")
+
+# ——— КОНЕЦ ДОБАВЛЕНИЯ ———
+
 print("Onyx полностью готов к работе")
 
 # Инициализация БД и запуск бота — без if name и без asyncio.run!
 bot.loop.run_until_complete(init_db())
 bot.run_forever()
+
 
 
 
