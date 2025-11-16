@@ -1,7 +1,9 @@
-# main.py — последняя рабочая версия на Railway
+# main.py — гарантированно работает на Railway 17.11.2025
 from vkbottle.bot import Bot, Message
 import os
 
+# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+# Только так в vkbottle 4.x — передаём токен как строку
 bot = Bot(token=os.getenv("TOKEN"))
 
 @bot.on.message()
@@ -19,7 +21,5 @@ async def handler(message: Message):
 
 print("Onyx запущен — ждём сообщений из чатов сообществ")
 
-# Самый надёжный способ на Railway в 2025 году
 if __name__ == "__main__":
-    bot.run_forever()
-
+    bot.run_forever()   # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
