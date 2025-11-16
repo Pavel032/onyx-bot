@@ -1,7 +1,7 @@
 import logging
 import os
 import aiosqlite
-from vkbottle import Bot, Message
+from vkbottle.bot import Bot, Message
 from vkbottle.modules import logger
 
 # Настройка логирования (чтобы не было предупреждений в логах Railway)
@@ -149,3 +149,4 @@ if __name__ == "__main__":
     asyncio.run(init_db())
     print("Onyx полностью готов к работе ⚫")
     bot.run_forever()
+
