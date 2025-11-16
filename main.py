@@ -1,19 +1,24 @@
 from vkbottle.bot import Bot, Message
 import os
 
-# Явно указываем group_id (это спасает от ошибки NoneType)
-GROUP_ID = 233971978  # ← замени на ID своего сообщества Onyx Чат-Менеджер
-# Как узнать ID: зайди в сообщество → в адресной строке будет club228571140 или public228571140 → цифры и есть ID
+# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+# Замени 123456789 на настоящий ID своего сообщества
+# (в ссылке на сообщество это цифры после club или public)
+GROUP_ID = 233971978   # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 
-bot = Bot(token=os.getenv("TOKEN"), group_id=GROUP_ID)
+bot = Bot(
+    token=os.getenv("TOKEN"),
+    group_ids=[GROUP_ID]          # ← именно group_ids и в виде списка!
+)
 
 @bot.on.chat_message(text="!пинг")
 async def ping(message: Message):
-    await message.answer("Onyx живой и полностью рабочий!\n2025 год — победа ⚫")
+    await message.answer("⚫ Onyx наконец-то живой!\n2025 год — полная победа!")
 
 @bot.on.chat_message(text=["!помощь", "!help"])
 async def help_cmd(message: Message):
-    await message.answer("Onyx онлайн!\nВсе функции скоро будут добавлены")
+    await message.answer("⚫ Onyx 100 % работает в чатах сообществ!\nГотов к бою")
 
-print("Onyx запущен без ошибок — готов к работе ⚫")
+print("Onyx запущен — всё работает ⚫")
 bot.run_polling()
