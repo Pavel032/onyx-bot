@@ -1,24 +1,24 @@
+# main.py
 from vkbottle.bot import Bot, Message
 import os
 
 # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-# Замени 123456789 на настоящий ID своего сообщества
-# (в ссылке на сообщество это цифры после club или public)
-GROUP_ID = 233971978   # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+# Замени на настоящий ID своего сообщества Onyx Чат-Менеджер
+GROUP_ID = 233971978  # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 
 bot = Bot(
-    token=os.getenv("TOKEN"),
-    group_ids=[GROUP_ID]          # ← именно group_ids и в виде списка!
+    token=os.getenv("TOKEN"),   # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+    group_ids=[GROUP_ID]        # ← вот так, с запятой после token!
 )
 
 @bot.on.chat_message(text="!пинг")
 async def ping(message: Message):
-    await message.answer("⚫ Onyx наконец-то живой!\n2025 год — полная победа!")
+    await message.answer("⚫ Onyx живой!\n2025 — полная победа!")
 
 @bot.on.chat_message(text=["!помощь", "!help"])
 async def help_cmd(message: Message):
-    await message.answer("⚫ Onyx 100 % работает в чатах сообществ!\nГотов к бою")
+    await message.answer("⚫ Onyx 100 % работает в чатах сообществ!")
 
-print("Onyx запущен — всё работает ⚫")
+print("Onyx запущен — всё идеально ⚫")
 bot.run_polling()
