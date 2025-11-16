@@ -1,4 +1,4 @@
-# main.py — гарантированно работает на Railway 17.11.2025
+# main.py — последняя рабочая версия на Railway
 from vkbottle.bot import Bot, Message
 import os
 
@@ -12,15 +12,13 @@ async def handler(message: Message):
     text = message.text.strip().lower()
 
     if text in ["!пинг", "пинг", ".пинг", "!ping"]:
-        await message.answer("⚫ Onyx живой!\n17.11.2025 — наконец-то всё работает в чатах сообществ!")
+        await message.answer("Onyx живой!\n17.11.2025 — всё работает в чатах сообществ!")
 
     if text in ["!помощь", "!help"]:
-        await message.answer("⚫ Onyx полностью онлайн!")
+        await message.answer("Onyx полностью онлайн!")
 
-print("Onyx запущен — ждёт сообщений из чатов сообществ ⚫")
+print("Onyx запущен — ждём сообщений из чатов сообществ")
 
-# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-# Самый надёжный способ запуска на Railway
-bot.loop_wrapper.on_startup.append(print("Поллинг стартовал"))
-bot.run_forever()
-# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+# Самый надёжный способ на Railway в 2025 году
+if name == "main":
+    bot.run_forever()
