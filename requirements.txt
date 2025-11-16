@@ -1,1 +1,1 @@
-vkbottle==5.1.3
+vkbottle==4.3.3
