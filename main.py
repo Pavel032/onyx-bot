@@ -23,5 +23,6 @@ async def handler(message: Message):
 
 print("Onyx запущен — ждём сообщений из чатов сообществ ⚫")
 
-if name == "main":
+if __name__ == "__main__":
     bot.run_forever()
+
