@@ -20,5 +20,6 @@ async def handler(message: Message):
 print("Onyx запущен — ждём сообщений из чатов сообществ")
 
 # Самый надёжный способ на Railway в 2025 году
-if name == "main":
+if __name__ == "__main__":
     bot.run_forever()
+
