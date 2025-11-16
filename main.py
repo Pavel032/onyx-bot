@@ -1,3 +1,112 @@
+import logging
+import os
+import aiosqlite
+from vkbottle import Bot, Message
+from vkbottle.modules import logger
+
+# Настройка логирования (чтобы не было предупреждений в логах Railway)
+logging.basicConfig(level=logging.INFO)
+
+# Твой токен из переменной Railway
+bot = Bot(token=os.getenv("TOKEN"))
+
+# База данных для варнов, статистики и ЧС
+DB = "onyx.db"
+
+async def init_db():
+    async with aiosqlite.connect(DB) as db:
+        await db.executescript("""
+            CREATE TABLE IF NOT EXISTS warns (peer_id INTEGER, user_id INTEGER, count INTEGER DEFAULT 1, PRIMARY KEY(peer_id, user_id));
+            CREATE TABLE IF NOT EXISTS blacklist (peer_id INTEGER, user_id INTEGER, reason TEXT, until TIMESTAMP);
+            CREATE TABLE IF NOT EXISTS stats (peer_id INTEGER, user_id INTEGER, messages INTEGER DEFAULT 1, PRIMARY KEY(peer_id, user_id));
+        """)
+        await db.commit()
+
+# Проверка, админ ли пользователь
+async def is_admin(message: Message):
+    try:
+        members = await bot.api.messages.get_conversation_members(peer_id=message.peer_id, fields="is_admin")
+        return any(m.member_id == message.from_id and m.is_admin for m in members.items)
+    except:
+        return False
+
+# Команды
+@bot.on.message(text=["!пинг", "!ping", "пинг"])
+async def ping(message: Message):
+    await message.answer("⚫ Onyx онлайн | 2025 | Полный клон pxolly готов!")
+
+@bot.on.message(text=["!помощь", "!help"])
+async def help_cmd(message: Message):
+    help_text = """
+⚫ Onyx • Чат-менеджер 2025
+
+Модерация (только админы):
+!бан @user [причина] [1ч/1д/7д] — бан
+!разбан @user — разбан
+!кик @user — кик
+!варн @user [причина] — варн (3 → бан)
+!разварн @user — снять варн
+!удалить [число] — удалить последние сообщения
+!чс — список ЧС
+
+Настройки:
+!антимат вкл/выкл — антимат
+!префикс . — сменить префикс
+
+Инфо:
+!стата [@user] — статистика
+!топ — топ активных
+!пинг — тест
+
+Аддоны и мини-приложение — в настройках группы.
+    """
+    await message.answer(help_text)
+
+@bot.on.message(text="!бан")
+async def ban(message: Message):
+    if not await is_admin(message):
+        return await message.answer("Только админы могут банить.")
+    if not message.reply_to_message:
+        return await message.answer("Ответь на сообщение пользователя.")
+    user = message.reply_to_message.from_id
+    reason = message.text.split(" ", 2)[2] if len(message.text.split()) > 2 else "Без причины"
+    time = message.text.split(" ")[2] if len(message.text.split()) > 2 and message.text.split()[2] in ["1ч", "1д", "7д"] else "навсегда"
+    
+    # Добавляем в ЧС
+    async with aiosqlite.connect(DB) as db:
+        await db.execute("INSERT OR REPLACE INTO blacklist VALUES (?, ?, ?, ?)", (message.peer_id, user, reason, time))
+        await db.commit()
+    
+    await bot.api.messages.remove_chat_user(message.peer_id, user)
+    await message.answer(f"⚫ {user} забанен по причине: {reason} ({time})")
+
+@bot.on.message(text="!кик")
+async def kick(message: Message):
+    if not await is_admin(message):
+        return
+    if not message.reply_to_message:
+        return await message.answer("Ответь на сообщение.")
+    user = message.reply_to_message.from_id
+    await bot.api.messages.remove_chat_user(message.peer_id, user)
+    await bot.api.messages.add_chat_user(message.peer_id, user)
+    await message.answer(f"⚫ {user} кикнут.")
+
+@bot.on.message(text="!варн")
+async def warn(message: Message):
+    if not await is_admin(message):
+        return
+    if not message.reply_to_message:
+        return await message.answer("Ответь на сообщение.")
+    user = message.reply_to_message.from_id
+    async with aiosqlite.connect(DB) as db:
+        await db.execute("INSERT OR REPLACE INTO warns VALUES (?, ?, (SELECT count FROM warns WHERE peer_id=? AND user_id=?)+1)", (message.peer_id, user, message.peer_id, user))
+        await db.commit()
+        cur = await db.execute("SELECT count FROM warns WHERE peer_id=? AND user_id=?", (message.peer_id, user))
+        count = (await cur.fetchone())[0]
+    
+    await message.answer(f"⚫ Варн {count}/3 для {user}")
+    if count >= 3:
+        await ban(message)  # Автобан
 @bot.on.message(text="!стата")
 async def stat(message: Message):
     target = message.reply_to_message.from_id if message.reply_to_message else message.from_id
