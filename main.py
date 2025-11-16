@@ -1,28 +1,18 @@
 from vkbottle.bot import Bot, Message
 import os
 
-# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-# В 4-й версии Bot принимает именно api, а не token напрямую
-from vkbottle import API
-api = API(token=os.getenv("TOKEN"))
-bot = Bot(api=api)
-# ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+# Явно указываем group_id — это обходит всю ошибку
+GROUP_ID = 233971978  # ← твой ID сообщества Onyx Чат-Менеджер
 
-@bot.on.message()
-async def handler(message: Message):
-    if not message.text:
-        return
+bot = Bot(token=os.getenv("TOKEN"), group_id=GROUP_ID)
 
-    text = message.text.strip().lower()
+@bot.on.chat_message(text=["!пинг", "пинг"])
+async def ping(message: Message):
+    await message.answer("Onyx живой!\n17.11.2025 — полная победа в чатах сообществ!")
 
-    if text in ["!пинг", "пинг", ".пинг", "!ping"]:
-        await message.answer("⚫ Onyx наконец-то живой!\n17.11.2025 — полная победа в чатах сообществ!")
+@bot.on.chat_message(text=["!помощь", "!help"])
+async def help_cmd(message: Message):
+    await message.answer("Onyx 100 % работает!")
 
-    if text in ["!помощь", "!help"]:
-        await message.answer("⚫ Onyx 100% работает!")
-
-print("Onyx запущен — ждём сообщений из чатов сообществ ⚫")
-
-if __name__ == "__main__":
-    bot.run_forever()
-
+print("Onyx запущен — готов к работе в чатах сообществ")
+bot.run_polling()
