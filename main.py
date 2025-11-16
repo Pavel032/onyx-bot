@@ -11,19 +11,16 @@ async def handler(message: Message):
     text = message.text.strip().lower()
 
     if text in ["!пинг", ".пинг", "пинг", "!ping"]:
-        await message.answer("⚫ Onyx онлайн | 2025 | 100 % живой!")
+        await message.answer("⚫ Onyx онлайн | 2025 | Полностью живой!")
 
-    if text in ["!помощь", "!help", "помощь"]:
+    if text in ["!помощь", "!help", "помощь", "help"]:
         await message.answer("""⚫ Onyx • Чат-менеджер 2025
 
-!пинг — проверка
-Скоро добавим:
-• !бан @user
-• !кик @user  
-• !варн @user (3 → автобан)
-• антимат / антиссылки
-• статистика / топ
-• мини-приложение как у pxolly""")
+!пинг — проверка бота
+!помощь — это меню
+
+Скоро добавим всё остальное:
+• !бан • !кик • !варн • антимат • статистика • топ • мини-приложение""")
 
 print("Onyx полностью запущен ⚫")
-await bot.run_polling()
+bot.run_polling()   # ← без await !!!
