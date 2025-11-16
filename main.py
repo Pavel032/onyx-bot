@@ -1,10 +1,11 @@
-# main.py — работает в чатах сообществ без group_ids
+# main.py — работает на vkbottle 4.3.3 + Railway
 from vkbottle.bot import Bot, Message
 import os
 
-bot = Bot(token=os.getenv("TOKEN"))  # Только token — ничего больше!
+# Только токен — group_id не нужен и вызывает ошибки
+bot = Bot(token=os.getenv("TOKEN"))
 
-@bot.on.message()  # Ловим все сообщения, включая чаты сообществ
+@bot.on.message()  # Ловим ВСЁ, включая чаты сообществ
 async def handler(message: Message):
     if not message.text:
         return
@@ -12,13 +13,13 @@ async def handler(message: Message):
     text = message.text.strip().lower()
 
     if text in ["!пинг", "пинг", ".пинг", "!ping"]:
-        await message.answer("⚫ Onyx живой!\n17.11.2025 — полная победа в чатах сообществ!")
+        await message.answer("Onyx живой!\n17.11.2025 — наконец-то полная победа в чатах сообществ!")
 
     if text in ["!помощь", "!help"]:
-        await message.answer("⚫ Onyx полностью онлайн!\nГотов к бою")
+        await message.answer("Onyx 100% работает!")
 
-print("Onyx запущен — ждёт сообщений из чатов сообществ ⚫")
+print("Onyx запущен — ждёт сообщений из чатов сообществ")
 
 if __name__ == "__main__":
-    bot.run_forever()  # Стабильный запуск для 4.x
-
+    bot.run_forever()   # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+                        # Именно run_forever(), а НЕ run_polling()!
