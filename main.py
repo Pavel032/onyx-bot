@@ -146,9 +146,11 @@ async def count_stats(message: Message):
         await db.execute("INSERT OR REPLACE INTO stats VALUES (?, ?, (SELECT messages FROM stats WHERE peer_id=? AND user_id=?)+1)", (message.peer_id, message.from_id, message.peer_id, message.from_id))
         await db.commit()
 
-if __name__ == "__main__":
-    asyncio.run(init_db())
-    print("Onyx полностью готов к работе ⚫")
-    bot.run_forever()
+print("Onyx полностью готов к работе")
+
+# Инициализация БД и запуск бота — без if name и без asyncio.run!
+bot.loop.run_until_complete(init_db())
+bot.run_forever()
+
 
 
