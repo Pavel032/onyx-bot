@@ -1,2 +1,4 @@
 vkbottle==4.3.3
 aiosqlite
+fastapi
+uvicorn
