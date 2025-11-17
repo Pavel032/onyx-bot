@@ -38,30 +38,6 @@ async def web_panel():
     </body></html>
     """
 
-# === КАПЧА С КАРТИНКОЙ ===
-async def generate_captcha():
-    num1, num2 = random.randint(10,99), random.randint(10,99)
-    answer = num1 + num2
-    photo = await uploader.upload(f"{num1} + {num2} = ?", f"captcha_{num1}_{num2}.png")
-    return answer, photo
-
-# === РАБОЧАЯ КАПЧА 2025 (vkbottle 4.3.3) ===
-
-    if message.action and message.action.type == "chat_invite_user" and message.action.member_id > 0:
-        # Генерируем простую текстовую капчу (картинку уберём, чтобы не падало)
-        num1, num2 = random.randint(5, 20), random.randint(5, 20)
-        answer = num1 + num2
-        # Сохраняем ответ в памяти (для простоты)
-        if not hasattr(bot, "captcha_storage"):
-            bot.captcha_storage = {}
-        bot.captcha_storage[message.action.member_id] = answer
-        
-        await message.answer(
-            f"[id{message.action.member_id}|Новый участник!]\n"
-            f"Реши капчу за 60 секунд, иначе кик:\n"
-            f"{num1} + {num2} = ?"
-        )
-
 @labeler.message(text=["<num:int>"])
 async def check_captcha(message: Message, num: int):
     if hasattr(bot, "captcha_storage") and message.from_id in bot.captcha_storage:
@@ -138,5 +114,6 @@ print("Onyx 2025 Ultimate — запуск...")
 bot.loop.create_task(run_web())
 bot.loop.run_until_complete(init_db())
 bot.run_forever()
+
 
 
