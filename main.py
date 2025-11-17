@@ -45,14 +45,42 @@ async def generate_captcha():
     photo = await uploader.upload(f"{num1} + {num2} = ?", f"captcha_{num1}_{num2}.png")
     return answer, photo
 
-@bot.on.chat_invite()
-async def captcha_new(m: Message):
-    if m.action.member_id < 0: return
-    answer, photo = await generate_captcha()
-    async with aiosqlite.connect(DB) as db:
-        await db.execute("REPLACE INTO captcha VALUES (?, ?, ?)", (m.action.member_id, answer, photo))
-        await db.commit()
-    await m.answer(f"[id{m.action.member_id}|Новый участник], реши капчу за 60 сек!\nИначе — кик!", attachment=photo)
+# === РАБОЧАЯ КАПЧА 2025 (vkbottle 4.3.3) ===
+from vkbottle.bot import BotLabeler
+
+labeler = BotLabeler()
+bot.labeler = labeler
+
+@labeler.chat_invite()
+async def captcha_new_user(message: Message):
+    if message.action and message.action.type == "chat_invite_user" and message.action.member_id > 0:
+        # Генерируем простую текстовую капчу (картинку уберём, чтобы не падало)
+        num1, num2 = random.randint(5, 20), random.randint(5, 20)
+        answer = num1 + num2
+        # Сохраняем ответ в памяти (для простоты)
+        if not hasattr(bot, "captcha_storage"):
+            bot.captcha_storage = {}
+        bot.captcha_storage[message.action.member_id] = answer
+        
+        await message.answer(
+            f"[id{message.action.member_id}|Новый участник!]\n"
+            f"Реши капчу за 60 секунд, иначе кик:\n"
+            f"{num1} + {num2} = ?"
+        )
+
+@labeler.message(text=["<num:int>"])
+async def check_captcha(message: Message, num: int):
+    if hasattr(bot, "captcha_storage") and message.from_id in bot.captcha_storage:
+        if bot.captcha_storage[message.from_id] == num:
+            del bot.captcha_storage[message.from_id]
+            await message.answer("Капча пройдена! Добро пожаловать в 2025")
+        else:
+            await message.answer("Неверно! Кик через 5 сек...")
+            await asyncio.sleep(5)
+            try:
+                await bot.api.messages.remove_chat_user(chat_id=message.chat_id, user_id=message.from_id)
+            except:
+                pass
 
 @bot.on.message(text="<answer:int>")
 async def check_captcha(m: Message, answer: int):
@@ -116,3 +144,4 @@ print("Onyx 2025 Ultimate — запуск...")
 bot.loop.create_task(run_web())
 bot.loop.run_until_complete(init_db())
 bot.run_forever()
+
