@@ -46,13 +46,7 @@ async def generate_captcha():
     return answer, photo
 
 # === РАБОЧАЯ КАПЧА 2025 (vkbottle 4.3.3) ===
-from vkbottle.bot import BotLabeler
 
-labeler = BotLabeler()
-bot.labeler = labeler
-
-@labeler.chat_invite()
-async def captcha_new_user(message: Message):
     if message.action and message.action.type == "chat_invite_user" and message.action.member_id > 0:
         # Генерируем простую текстовую капчу (картинку уберём, чтобы не падало)
         num1, num2 = random.randint(5, 20), random.randint(5, 20)
@@ -144,4 +138,5 @@ print("Onyx 2025 Ultimate — запуск...")
 bot.loop.create_task(run_web())
 bot.loop.run_until_complete(init_db())
 bot.run_forever()
+
 
